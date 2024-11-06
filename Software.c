@@ -37,13 +37,13 @@ void driveLen(float dist) {
 	//Wheel spins 3 times for 1 motor spin, torque / 3
 	nMotorEncoder[motorA] = 0;
 	const float WHEEL_RADIUS = 8.16 / 2;
-	const float CONVERSION = PI * WHEEL_RADIUS / 180;
+	const float CONVERSION = 3 * PI * WHEEL_RADIUS / 180;
 
 	motor[motorA] = motor[motorD] = FULL_POWER;
 
 	while (abs(nMotorEncoder[motorA]) * CONVERSION < dist) {}
 
-	motor[motorA] = motor[motorD] = FULL_POWER;
+	motor[motorA] = motor[motorD] = 0;
 }
 
 void readFile(int &rescueX, int &rescueY, int &saveX, int &saveY) {
@@ -62,12 +62,12 @@ void readFile(int &rescueX, int &rescueY, int &saveX, int &saveY) {
 }
 
 void configureSensors() {
-	SensorType[S1] = sensorEV3_Gyro;
-	wait1Msec(50);
-	SensorMode[S1] = modeEV3Gyro_Calibration;
-	wait1Msec(50);
-	SensorMode[S1] = modeEV3Gyro_RateAndAngle;
-	wait1Msec(50);
+	// SensorType[S1] = sensorEV3_Gyro;
+	// wait1Msec(50);
+	// SensorMode[S1] = modeEV3Gyro_Calibration;
+	// wait1Msec(50);
+	// SensorMode[S1] = modeEV3Gyro_RateAndAngle;
+	// wait1Msec(50);
 }
 
 void clamp(){
