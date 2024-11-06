@@ -74,11 +74,30 @@ void configureSensors() {
 	wait1Msec(50);
 }
 
+moveBot(int rescueX, int rescueY, int saveX, int saveY){
+	double angle = 0;
+	dist = sqrt(pow((saveX-rescueX),2)+pow((saveY-rescueY)));
+	//find angle equation
+	resetGyro(S4);
+	motor[motorA] = 50;
+	motor[motorD] = -50;
+	while(abs(sensorValue(S4)) < angle)
+		{}
+	motor[motorA] = motor[motorD] = 0;
+	wait1Msec(1000);
+	nMotorEncoder[motorA] = 0;
+	motor[motorA] = motor[motorD] = FULL_POWER;
+	while(abs(nMotorEncoder[motorA]) < dist)
+		{}
+	motor[motorA] = motor[motorD] = 0;
+	if()
+}
 
 void clamp(){
 	nMotorEncoder(motorB) = 0;
 	//if(openClose == "open"){
 		motor[motorB] = 25;//assuming positive is opening the clamp
+		moveBot();
 		while(getSensorValue[s2] != (int)colorBlue)// test value to know if its closed
 			{}
 		motor[motorB] = -25;
@@ -88,7 +107,6 @@ void clamp(){
 
 	//}
 }
-
 
 task main()
 {
