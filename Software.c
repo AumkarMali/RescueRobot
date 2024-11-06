@@ -62,12 +62,12 @@ void readFile(int &rescueX, int &rescueY, int &saveX, int &saveY) {
 }
 
 void configureSensors() {
-	// SensorType[S1] = sensorEV3_Gyro;
-	// wait1Msec(50);
-	// SensorMode[S1] = modeEV3Gyro_Calibration;
-	// wait1Msec(50);
-	// SensorMode[S1] = modeEV3Gyro_RateAndAngle;
-	// wait1Msec(50);
+	SensorType[S1] = sensorEV3_Gyro;
+	wait1Msec(50);
+	SensorMode[S1] = modeEV3Gyro_Calibration;
+	wait1Msec(50);
+	SensorMode[S1] = modeEV3Gyro_RateAndAngle;
+	wait1Msec(50);
 }
 
 void clamp(){
