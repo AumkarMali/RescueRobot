@@ -15,6 +15,7 @@ void elevate(int increments) {
 	motor[motorC] = 0;
 }
 
+
 void rotate(float deg) {
 	resetGyro(S1);
 	//CCW
@@ -32,12 +33,13 @@ void rotate(float deg) {
 	motor[motorA] = motor[motorD] = 0;
 }
 
+
 void driveLen(float dist) {
 	//Gear ratio is 36 tooth : 12 tooth
 	//Wheel spins 3 times for 1 motor spin, torque / 3
 	nMotorEncoder[motorA] = 0;
 	const float WHEEL_RADIUS = 8.16 / 2;
-	const float CONVERSION = 3 * PI * WHEEL_RADIUS / 180;
+	const float CONVERSION = PI * WHEEL_RADIUS / 180;
 
 	motor[motorA] = motor[motorD] = FULL_POWER;
 
@@ -45,6 +47,7 @@ void driveLen(float dist) {
 
 	motor[motorA] = motor[motorD] = 0;
 }
+
 
 void readFile(int &rescueX, int &rescueY, int &saveX, int &saveY) {
 	ifStream coords;
@@ -61,6 +64,7 @@ void readFile(int &rescueX, int &rescueY, int &saveX, int &saveY) {
 	}
 }
 
+
 void configureSensors() {
 	SensorType[S1] = sensorEV3_Gyro;
 	wait1Msec(50);
@@ -70,25 +74,19 @@ void configureSensors() {
 	wait1Msec(50);
 }
 
+
 void clamp(){
 	nMotorEncoder(motorB) = 0;
 	//if(openClose == "open"){
 		motor[motorB] = 25;//assuming positive is opening the clamp
 		while(getSensorValue[s2] != (int)colorBlue)// test value to know if its closed
-			{
-
-
-			}
+			{}
 		motor[motorB] = -25;
 		wait1Msec(1000);
 		motor[motorB] = 0;
 	//}else{
 
 	//}
-}
-
-moveBot(){
-
 }
 
 
@@ -102,31 +100,8 @@ task main()
 	wait1Msec(1000);
 
 
-	while (!bBTSkipStartup){}
-
-	// Send a test message to the computer
-	string msgOut = "Hello from EV3!";
-	sendMessageWithParm(1, msgOut, 0);
-
-	// Receive messages from the computer
-	while (true)
-	{
-		if (bQueuedMsgAvailable())
-		{
-			string msgIn;
-			msgIn = readMsg();
-			nxtDisplayString(1, "Received: %s", msgIn);
-		}
-		wait1Msec(50); // Small delay to avoid flooding
-	}
-
-
 	int rescueX = 0, rescueY = 0, saveX = 0, saveY = 0;
 	readFile(rescueX,rescueY, saveX, saveY);
 	moveBot();
-
-
-
 }
-{
-}
+
