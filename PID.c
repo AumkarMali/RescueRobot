@@ -68,12 +68,17 @@ void readFile(int &rescueX, int &rescueY, int &saveX, int &saveY) {
 }
 
 
-void configureSensors() {
-	SensorType[S1] = sensorEV3_Gyro;
+void configureAllSensors ()
+{
+	SensorType[S4] = sensorEV3_Gyro;
 	wait1Msec(50);
-	SensorMode[S1] = modeEV3Gyro_Calibration;
+	SensorMode[S4] = modeEV3Gyro_Calibration;
 	wait1Msec(50);
-	SensorMode[S1] = modeEV3Gyro_RateAndAngle;
+	SensorMode[S4] = modeEV3Gyro_RateAndAngle;
+	wait1Msec(50);
+	SensorMode[S3] = sensorEV3_Color;
+	wait1Msec(50);
+	SensorMode[S3] = modeEV3Color_Color;
 	wait1Msec(50);
 }
 
@@ -200,4 +205,38 @@ task main()
 		}
 	}
 
+}
+\
+
+void fileRead(TFileHandle read, float &x2, float &y2)
+{
+		readFloatPC(read, x2);
+		readFloatPC(read, y2);
+}
+
+
+task main()
+{
+	float x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+	string space = " ";
+
+
+	TFileHandle read;
+	bool fileOkay = openReadPC(read, "shortest_path.txt");
+
+	if (!fileOkay)
+	{
+		displayString(5, "Error!");
+		wait1Msec(5000);
+	} else {
+		for(int i = 0; i<7; i++)
+		{
+			wait1Msec(1000);
+			x1 = x2;
+			y1 = y2;
+			fileRead(read, x2, y2);
+			displayTextLine(4, "%f%s%f", x2, space, y2);
+		}
+	}
+	closeFilePC(read);
 }
