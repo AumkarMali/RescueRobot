@@ -3,7 +3,7 @@
 //ROBOT C
 const int FULL_POWER = 100;
 
-void elevate(int increments) {
+void elevate(int increments, string upOrDown) {
 	nMotorEncoder[motorC] = 0;
 
 	if (increments > 0 {
@@ -22,12 +22,12 @@ void elevate(int increments) {
 void rotate(float deg) {
 	resetGyro(S1);
 	//CCW
-	if (deg > 0) {
+	if (deg <= 180) {
 		motor[motorA] = FULL_POWER;
 		motor[motorD] = -1 * FULL_POWER;
 	}
 	//CW
-	else if (deg < 0) {
+	else {
 		motor[motorA] = -1 * FULL_POWER;
 		motor[motorD] = FULL_POWER;
 	}
@@ -88,7 +88,34 @@ openClamp(int rescueX, int rescueY, int saveX, int saveY){
 	motor[motorB] = 0;
 }
 
-moveBot(){
+moveBot(int rescueX, int rescueY, int saveX, int saveY, int counter, float angle){
+	if (count == 0){
+		//move from (0,0) to first pick up
+		
+	}else{
+		/*
+ 		Pick up stuff
+   		move
+     		dropoff
+       		end function and repeat 3 times
+ 		 */
+	}
+
+	rotate(angle)
+	dist = sqrt(pow((saveX-rescueX),2)+pow((saveY-rescueY)));
+	nMotorEncoder[motorA] = 0;
+	motor[motorA] = motor[motorD] = FULL_POWER;
+	while(sensorValue[S2] == (int)colorRed)
+		{}
+	
+	while(abs(nMotorEncoder[motorA]) < dist)
+		{}
+	motor[motorA] = motor[motorD] = 0;
+
+
+
+	// prevCode
+	/*
 	double angle = 0;
 	dist = sqrt(pow((saveX-rescueX),2)+pow((saveY-rescueY)));
 	//find angle equation
@@ -99,11 +126,10 @@ moveBot(){
 	while(abs(nMotorEncoder[motorA]) < dist)
 		{}
 	motor[motorA] = motor[motorD] = 0;
+	*/
 }
 
-closeClamp(){
-	nMotorEncoder(motorB) = 0;
-	moveBot(rescueX, rescueY, saveX, saveY, openClose); // makes sure the bot is in the correct location
+operateClaw(){
 	motor[motorB] = 25;//assuming positive is closing the clamp
 	while(getSensorValue[s2] != (int)colorBlue)
 		{}
@@ -126,26 +152,52 @@ task main()
 	wait1Msec(1000);
   
   
-  //get path
-  double min_distance = DBL_MAX;
+  // //get path
+  // double min_distance = DBL_MAX;
     
-  // Get the shortest path
-  vector<string> shortest = shortest_path(min_distance);
+  // // Get the shortest path
+  // vector<string> shortest = shortest_path(min_distance);
   
-  string prevNode = "A";
-  float currDist = 0;
+  // string prevNode = "A";
+  // float currDist = 0;
 
 
-  for (const auto& node : shortest) {
-    if (node != prevNode) {
+  // for (const auto& node : shortest) {
+  //   if (node != prevNode) {
   
-      currDist = calculate_distance(coord[prevNode], coord[node]);
-    }
-  }
-  cout << "\nTotal Distance: " << min_distance << endl;
-
-
-	int rescueX = 0, rescueY = 0, saveX = 0, saveY = 0;
+  //     currDist = calculate_distance(coord[prevNode], coord[node]);
+  //   }
+  // }
+	displayTextline (5, ("Total Distance: &f", min_distance)); // idk if this works
+	
+	int pickX = 0, pickY = 0, dropX = 0, dropY = 0, prevX = 0, prevY = 0;
+	double angle = 0;
+	
 	readFile(rescueX,rescueY, saveX, saveY);
-	moveBot();
+	operateClaw("open");
+	evevate("up");
+	for (int i = 0; i < 3; i++){
+		angle = getDegrees(pickX, pickY, dropX, dropY);
+		if(i == 0){
+			angle = getDegrees(0,0, pickX, pickY)
+			moveBot(0, 0, pickX, pickY, i);
+			elevate("down");
+			operateClaw("close");
+			elevate("up");
+			moveBot(pickX, pickY, dropX, dropY, i);
+			prevX = saveX;
+			prevY = saveY;
+			operateClaw("open");
+			elevate("up");
+		}else{
+			moveBot(prevX, prevY, pickX, pickY);
+			//do the rest of the set up
+			moveBot(pickX, pickY, dropX, dropY, i);
+			prevX = saveX;
+			prevY = saveY;
+			operateClaw("close");
+			moveBot(saveY = )
+		}
+	}
+
 }
