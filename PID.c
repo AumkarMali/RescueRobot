@@ -94,20 +94,8 @@ openClamp(int rescueX, int rescueY, int saveX, int saveY){
 }
 
 moveBot(int rescueX, int rescueY, int saveX, int saveY, int counter, float angle){
-	if (count == 0){
-		//move from (0,0) to first pick up
-		
-	}else{
-		/*
- 		Pick up stuff
-   		move
-     		dropoff
-       		end function and repeat 3 times
- 		 */
-	}
-
-	rotate(angle)
 	dist = sqrt(pow((saveX-rescueX),2)+pow((saveY-rescueY)));
+	
 	nMotorEncoder[motorA] = 0;
 	motor[motorA] = motor[motorD] = FULL_POWER;
 	while(sensorValue[S2] == (int)colorRed)
@@ -116,22 +104,6 @@ moveBot(int rescueX, int rescueY, int saveX, int saveY, int counter, float angle
 	while(abs(nMotorEncoder[motorA]) < dist)
 		{}
 	motor[motorA] = motor[motorD] = 0;
-
-
-
-	// prevCode
-	/*
-	double angle = 0;
-	dist = sqrt(pow((saveX-rescueX),2)+pow((saveY-rescueY)));
-	//find angle equation
-	rotate(angle);
-	wait1Msec(1000);
-	nMotorEncoder[motorA] = 0;
-	motor[motorA] = motor[motorD] = FULL_POWER;
-	while(abs(nMotorEncoder[motorA]) < dist)
-		{}
-	motor[motorA] = motor[motorD] = 0;
-	*/
 }
 
 operateClaw(){
@@ -144,82 +116,48 @@ operateClaw(){
 	openClose = "close";
 }
 
-
-
-
-task main()
+void fileRead(TFileHandle read, float &x2, float &y2)
 {
-	configureSensors();
+	float pickX = 0, pickY = 0, dropX = 0, dropY = 0, prevX = 0, prevY = 0;
+	readFloatPC(read, pickX);
+	readFloatPC(read, pickY);
+	readFloatPC(read, dropX);
+	readFloatPC(read, dropY);
+	float angle = 0;
 
-	//Wait for enter button to start
-	while(!getButtonPress(buttonEnter)) {}
-	while(getButtonPress(buttonEnter)) {}
-	wait1Msec(1000);
-  
-  
-  // //get path
-  // double min_distance = DBL_MAX;
-    
-  // // Get the shortest path
-  // vector<string> shortest = shortest_path(min_distance);
-  
-  // string prevNode = "A";
-  // float currDist = 0;
-
-
-  // for (const auto& node : shortest) {
-  //   if (node != prevNode) {
-  
-  //     currDist = calculate_distance(coord[prevNode], coord[node]);
-  //   }
-  // }
-	displayTextline (5, ("Total Distance: &f", min_distance)); // idk if this works
-	
-	int pickX = 0, pickY = 0, dropX = 0, dropY = 0, prevX = 0, prevY = 0;
-	double angle = 0;
-	
-	readFile(rescueX,rescueY, saveX, saveY);
 	operateClaw("open");
 	evevate("up");
 	for (int i = 0; i < 3; i++){
-		angle = getDegrees(pickX, pickY, dropX, dropY);
-		if(i == 0){
-			angle = getDegrees(0,0, pickX, pickY)
-			moveBot(0, 0, pickX, pickY, i);
+			angle = getDegrees(prevX, prevY, pickX, pickY);
+			rotate(angle);	
+			moveBot(prevX, prevY, pickX, pickY);
 			elevate("down");
 			operateClaw("close");
-			elevate("up");
+			angle = getDegrees(pickX, pickY, dropX, dropY);
+			rotate(angle);
 			moveBot(pickX, pickY, dropX, dropY, i);
-			prevX = saveX;
-			prevY = saveY;
+			prevX = dropX;
+			prevY = dropY;
+			elevate("down");
 			operateClaw("open");
 			elevate("up");
-		}else{
-			moveBot(prevX, prevY, pickX, pickY);
-			//do the rest of the set up
-			moveBot(pickX, pickY, dropX, dropY, i);
-			prevX = saveX;
-			prevY = saveY;
-			operateClaw("close");
-			moveBot(saveY = )
 		}
-	}
-
-}
-\
-
-void fileRead(TFileHandle read, float &x2, float &y2)
-{
-		readFloatPC(read, x2);
-		readFloatPC(read, y2);
 }
 
 
 task main()
 {
+
+	configureSensors();
+
+	//Wait for enter button to start
+	while(!getButtonPress(buttonEnter)) 
+		{}
+	while(getButtonPress(buttonEnter))
+		{}
+	wait1Msec(1000);
 	float x1 = 0, y1 = 0, x2 = 0, y2 = 0;
 	string space = " ";
-
 
 	TFileHandle read;
 	bool fileOkay = openReadPC(read, "shortest_path.txt");
