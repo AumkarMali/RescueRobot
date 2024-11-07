@@ -112,35 +112,4 @@ vector<string> shortest_path(double &min_distance) {
 }
 
 
-task main()
-{
-	configureSensors();
 
-	//Wait for enter button to start
-	while(!getButtonPress(buttonEnter)) {}
-	while(getButtonPress(buttonEnter)) {}
-	wait1Msec(1000);
-  
-  
-  //get path
-  double min_distance = DBL_MAX;
-    
-  // Get the shortest path
-  vector<string> shortest = shortest_path(min_distance);
-  
-  string prevNode = "A";
-  float currDist = 0;
-
-
-  for (const auto& node : shortest) {
-    if (node != prevNode) {
-      currDist = calculate_distance(coord[prevNode], coord[node]);
-    }
-  }
-  cout << "\nTotal Distance: " << min_distance << endl;
-
-
-	int rescueX = 0, rescueY = 0, saveX = 0, saveY = 0;
-	readFile(rescueX,rescueY, saveX, saveY);
-	moveBot();
-}
