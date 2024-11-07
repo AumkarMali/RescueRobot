@@ -82,17 +82,6 @@ void configureAllSensors ()
 	wait1Msec(50);
 }
 
-openClamp(int rescueX, int rescueY, int saveX, int saveY){
-	nMotorEncoder(motorB) = 0;
-	motor[motorB] = -25;//assuming positive is closing the clamp
-	moveBot(rescueX, rescueY, saveX, saveY, openClose);
-	while(getSensorValue[s2] != (int)colorBlue)
-		{}
-	motor[motorB] = -25;
-	wait1Msec(1000);
-	motor[motorB] = 0;
-}
-
 moveBot(int rescueX, int rescueY, int saveX, int saveY, int counter, float angle){
 	dist = sqrt(pow((saveX-rescueX),2)+pow((saveY-rescueY)));
 	
