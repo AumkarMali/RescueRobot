@@ -27,9 +27,14 @@ double calculate_distance(pair<int, int>& node1, pair<int, int>& node2) {
 double calculate_angle(pair<int, int>& node1, pair<int, int>& node2) {
     int x1 = node1.first, y1 = node1.second;
     int x2 = node2.first, y2 = node2.second;
-    return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
+    double angle = (atan((y2-y1)/(x2-x1)))*(180/M_PI);
+    if (angle>180)
+    {
+    	angle -= 360;
+	}
+    
+    return angle;
 }
-
 
 // DFS function to find all paths from 'curr' to 'target'
 void dfs(const unordered_map<string, vector<string>>& graph, const string& curr, const string& target, 
