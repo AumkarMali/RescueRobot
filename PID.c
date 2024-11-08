@@ -1,4 +1,5 @@
-
+#pragma config(Motor, motorB, leftMotor, tmotorEV3_Large, PIDControl, encoder)
+#pragma config(Motor, motorC, rightMotor, tmotorEV3_Large, PIDControl, encoder)
 
 //ROBOT C
 const int FULL_POWER = 100;
@@ -18,6 +19,41 @@ void elevate(bool upOrDown) {
 	motor[motorC] = 0;
 }
 
+float calculateAngle(float x1, float y1, float x2, float y2, float x3, float y3) {
+    // Vector 1: from (x1, y1) to (x2, y2)
+    float vector1_x = x2 - x1;
+    float vector1_y = y2 - y1;
+    
+    // Vector 2: from (x2, y2) to (x3, y3)
+    float vector2_x = x3 - x2;
+    float vector2_y = y3 - y2;
+    
+    // Dot product of vector1 and vector2
+    float dot_product = (vector1_x * vector2_x) + (vector1_y * vector2_y);
+    
+    // Magnitudes of vector1 and vector2
+    float magnitude1 = sqrt(vector1_x * vector1_x + vector1_y * vector1_y);
+    float magnitude2 = sqrt(vector2_x * vector2_x + vector2_y * vector2_y);
+    
+    // Calculate the angle in radians
+    float angle_radians = acos(dot_product / (magnitude1 * magnitude2));
+    
+    // Convert angle to degrees
+    float angle_degrees = angle_radians * (180.0 / PI);
+    
+    // Calculate the cross product to determine the direction (clockwise or counterclockwise)
+    float cross_product = vector1_x * vector2_y - vector1_y * vector2_x;
+    
+    // Make angle negative if cross product is negative (indicating clockwise turn)
+    if (cross_product < 0) {
+        angle_degrees = -angle_degrees;
+    }
+    
+    return angle_degrees;
+}
+
+
+
 
 void rotate(float deg) {
 	resetGyro(S1);
@@ -35,22 +71,6 @@ void rotate(float deg) {
 
 	motor[motorA] = motor[motorD] = 0;
 }
-
-void readFile(int &rescueX, int &rescueY, int &saveX, int &saveY) {
-	ifStream coords;
-	coords.open("coordinates.txt");
-
-	if(!coords.fail()){
-
-		while(coords>>rescueX>>rescueY>>saveX>>saveY){
-
-		}
-
-	}else{
-		displayText(line5) = "Failed to open Files!";
-	}
-}
-
 
 void configureAllSensors ()
 {
@@ -124,6 +144,28 @@ void fileRead(TFileHandle read, float &x2, float &y2)
 			operateClaw("open");
 			elevate(up);
 		}
+	//For Angle stuff
+	 // Define the x and y coordinates of each waypoint
+    float x_coords[] = {0, -5, 0, -6, 3, 3, 9};
+    float y_coords[] = {0, 0, -1, -3, 3, 5, 4};
+    int num_waypoints = sizeof(x_coords) / sizeof(x_coords[0]);
+    
+    // Calculate angles between consecutive vectors and display them
+    for (int i = 0; i < num_waypoints - 2; i++) {
+        float angle = calculateAngle(
+            x_coords[i], y_coords[i],      // (x1, y1)
+            x_coords[i + 1], y_coords[i + 1],  // (x2, y2)
+            x_coords[i + 2], y_coords[i + 2]   // (x3, y3)
+        );
+        
+        // Display the angle (smallest possible turning angle)
+        displayTextLine(i, "Angle %d -> %d -> %d: %.2f deg", i, i + 1, i + 2, angle);
+        wait1Msec(1000);    // Pause briefly to view each angle
+    }
+    
+    wait1Msec(10000); // Wait to view all results on screen
+
+	
 }
 
 
