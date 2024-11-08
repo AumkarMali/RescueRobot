@@ -2,6 +2,8 @@
 
 //ROBOT C
 const int FULL_POWER = 100;
+const float WHEEL_RADIUS = 8.16 / 2;
+const float CONVERSION = PI * WHEEL_RADIUS / 180;
 
 void elevate(bool upOrDown) {
 	nMotorEncoder[motorC] = 0;
@@ -33,22 +35,6 @@ void rotate(float deg) {
 
 	motor[motorA] = motor[motorD] = 0;
 }
-
-
-void driveLen(float dist) {
-	//Gear ratio is 36 tooth : 12 tooth
-	//Wheel spins 3 times for 1 motor spin, torque / 3
-	nMotorEncoder[motorA] = 0;
-	const float WHEEL_RADIUS = 8.16 / 2;
-	const float CONVERSION = PI * WHEEL_RADIUS / 180;
-
-	motor[motorA] = motor[motorD] = FULL_POWER;
-
-	while (abs(nMotorEncoder[motorA]) * CONVERSION < dist) {}
-
-	motor[motorA] = motor[motorD] = 0;
-}
-
 
 void readFile(int &rescueX, int &rescueY, int &saveX, int &saveY) {
 	ifStream coords;
@@ -85,10 +71,15 @@ moveBot(int rescueX, int rescueY, int saveX, int saveY, int counter, float angle
 	
 	nMotorEncoder[motorA] = 0;
 	motor[motorA] = motor[motorD] = FULL_POWER;
-	while(sensorValue[S2] == (int)colorRed)
-		{}
 	
-	while(abs(nMotorEncoder[motorA]) < dist)
+	//For loop for slowing down bot
+	// while(sensorValue[S2] == (int)colorRed)
+	// 	{}
+	// for ()
+	// {
+	// 	}
+	
+	while(abs(nMotorEncoder[motorA]) * CONVERSION < dist)
 		{}
 	motor[motorA] = motor[motorD] = 0;
 }
