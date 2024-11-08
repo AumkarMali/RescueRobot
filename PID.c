@@ -3,17 +3,15 @@
 //ROBOT C
 const int FULL_POWER = 100;
 
-void elevate(int increments, string upOrDown) {
+void elevate(bool upOrDown) {
 	nMotorEncoder[motorC] = 0;
-
-	if (increments > 0 {
-		motor[motorC] = 10;
+	if(upOrDown){
+		motor[motorC] = -25;
+	}else{
+		motor[motorC] = 25;
 	}
-	else {
-		motor[motorC] = -10;
-	}
-
-	while(abs(nMotorEncoder[motorC]) < increments) {}
+	
+	while(abs(nMotorEncoder[motorC]) < 85) {}
 
 	motor[motorC] = 0;
 }
@@ -114,22 +112,26 @@ void fileRead(TFileHandle read, float &x2, float &y2)
 	readFloatPC(read, dropY);
 	float angle = 0;
 
+	bool up = 0;
+	bool down = 1;
+
 	operateClaw("open");
 	evevate("up");
 	for (int i = 0; i < 3; i++){
 			angle = getDegrees(prevX, prevY, pickX, pickY);
 			rotate(angle);	
 			moveBot(prevX, prevY, pickX, pickY);
-			elevate("down");
+			elevate(down);
 			operateClaw("close");
+			elevate(up);
 			angle = getDegrees(pickX, pickY, dropX, dropY);
 			rotate(angle);
 			moveBot(pickX, pickY, dropX, dropY, i);
 			prevX = dropX;
 			prevY = dropY;
-			elevate("down");
+			elevate(down);
 			operateClaw("open");
-			elevate("up");
+			elevate(up);
 		}
 }
 
