@@ -114,7 +114,7 @@ operateClaw(){
 	openClose = "close";
 }
 
-void fileRead(TFileHandle read, float &x2, float &y2)
+void fileRead(TFileHandle read)
 {
 	float pickX = 0, pickY = 0, dropX = 0, dropY = 0, prevX = 0, prevY = 0;
 	readFloatPC(read, pickX);
@@ -146,10 +146,11 @@ void fileRead(TFileHandle read, float &x2, float &y2)
 		}
 	//For Angle stuff
 	 // Define the x and y coordinates of each waypoint
-    float x_coords[] = {0, -5, 0, -6, 3, 3, 9};
-    float y_coords[] = {0, 0, -1, -3, 3, 5, 4};
+ // Define the x and y coordinates of each waypoint
+    float x_coords[] = {0, -5, 0, -6, 3, 3, 9 , 0};
+    float y_coords[] = {0, 0, -1, -3, 3, 5, 4 , 0};
     int num_waypoints = sizeof(x_coords) / sizeof(x_coords[0]);
-    
+
     // Calculate angles between consecutive vectors and display them
     for (int i = 0; i < num_waypoints - 2; i++) {
         float angle = calculateAngle(
@@ -157,12 +158,12 @@ void fileRead(TFileHandle read, float &x2, float &y2)
             x_coords[i + 1], y_coords[i + 1],  // (x2, y2)
             x_coords[i + 2], y_coords[i + 2]   // (x3, y3)
         );
-        
+
         // Display the angle (smallest possible turning angle)
         displayTextLine(i, "Angle %d -> %d -> %d: %.2f deg", i, i + 1, i + 2, angle);
         wait1Msec(1000);    // Pause briefly to view each angle
     }
-    
+
     wait1Msec(10000); // Wait to view all results on screen
 
 	
@@ -191,14 +192,7 @@ task main()
 		displayString(5, "Error!");
 		wait1Msec(5000);
 	} else {
-		for(int i = 0; i<7; i++)
-		{
-			wait1Msec(1000);
-			x1 = x2;
-			y1 = y2;
-			fileRead(read, x2, y2);
-			displayTextLine(4, "%f%s%f", x2, space, y2);
-		}
+		fileRead(read);
 	}
 	closeFilePC(read);
 }
