@@ -58,7 +58,7 @@ float calculateAngle(float x1, float y1, float x2, float y2, float x3, float y3)
 void rotate(float deg) {
 	resetGyro(S1);
 	//CCW
-	if (deg <= 180) {
+	if (deg >= 0) {
 		motor[motorA] = FULL_POWER;
 		motor[motorD] = -1 * FULL_POWER;
 	}
