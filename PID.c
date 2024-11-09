@@ -13,8 +13,8 @@ void elevate(bool upOrDown) {
 	}else{
 		motor[motorC] = 25;
 	}
-	
-	while(abs(nMotorEncoder[motorC]) < 85) {}
+
+	while(abs(nMotorEncoder[motorC]) < 110) {}
 
 	motor[motorC] = 0;
 }
