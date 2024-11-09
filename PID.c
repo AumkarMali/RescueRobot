@@ -19,39 +19,27 @@ void elevate(bool upOrDown) {
 	motor[motorC] = 0;
 }
 
-float calculateAngle(float x1, float y1, float x2, float y2, float x3, float y3) {
-    // Vector 1: from (x1, y1) to (x2, y2)
-    float vector1_x = x2 - x1;
-    float vector1_y = y2 - y1;
-    
-    // Vector 2: from (x2, y2) to (x3, y3)
-    float vector2_x = x3 - x2;
-    float vector2_y = y3 - y2;
-    
-    // Dot product of vector1 and vector2
-    float dot_product = (vector1_x * vector2_x) + (vector1_y * vector2_y);
-    
-    // Magnitudes of vector1 and vector2
-    float magnitude1 = sqrt(vector1_x * vector1_x + vector1_y * vector1_y);
-    float magnitude2 = sqrt(vector2_x * vector2_x + vector2_y * vector2_y);
-    
-    // Calculate the angle in radians
-    float angle_radians = acos(dot_product / (magnitude1 * magnitude2));
-    
-    // Convert angle to degrees
-    float angle_degrees = angle_radians * (180.0 / PI);
-    
-    // Calculate the cross product to determine the direction (clockwise or counterclockwise)
-    float cross_product = vector1_x * vector2_y - vector1_y * vector2_x;
-    
-    // Make angle negative if cross product is negative (indicating clockwise turn)
-    if (cross_product < 0) {
-        angle_degrees = -angle_degrees;
-    }
-    
-    return angle_degrees;
-}
+float calculateAngle(float x1, float y1, float x2, float y2, float previous_angle) {
+    // Vector from (x1, y1) to (x2, y2)
+    float vector_x = x2 - x1;
+    float vector_y = y2 - y1;
 
+    // Calculate the angle of this vector relative to the positive x-axis
+    float angle_radians = atan2(vector_y, vector_x);
+    float angle_degrees = angle_radians * (180.0 / PI);
+
+    // Calculate the smallest turn angle relative to the previous angle
+    float turn_angle = angle_degrees - previous_angle;
+
+    // Normalize to be within -180 to 180 degrees for shortest rotation
+    if (turn_angle > 180) {
+        turn_angle -= 360;
+    } else if (turn_angle < -180) {
+        turn_angle += 360;
+    }
+
+    return turn_angle;
+}
 
 
 
