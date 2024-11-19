@@ -1,10 +1,8 @@
-#pragma config(Motor, motorB, leftMotor, tmotorEV3_Large, PIDControl, encoder)
-#pragma config(Motor, motorC, rightMotor, tmotorEV3_Large, PIDControl, encoder)
 #include "PC_FileIO.c"
 #include "EV3Servo-lib-UW.c"
 
 //ROBOT C
-const int FULL_POWER = 100;
+const int FULL_POWER = 40;
 const float WHEEL_RADIUS = 8.16 / 2;
 const float CONVERSION = PI * WHEEL_RADIUS / 180;
 const int MAX_POINTS = 8;
@@ -40,14 +38,7 @@ float getDegrees(float x1, float y1, float x2, float y2, float previous_angle) {
 		} else if (turn_angle < -180) {
 		turn_angle += 360;
 	}
-	/*
-	if (turn_angle<0)
-	{
-		return turn_angle+3;
-	} else {
-		return turn_angle-3;
-	}
-	*/
+
 	return turn_angle;
 }
 
@@ -65,12 +56,9 @@ void rotate(float deg) {
 	}
 	motor[motorA] = direction;
 	motor[motorD] = direction*-1;
+
 	while (abs(getGyroDegrees(S1)) < abs(deg))
-		{
-			float error = 1.1 - abs(getGyroDegrees(S1))/deg;
-			motor[motorA] = direction*error;
-			motor[motorD] = (-1*direction)*error;
-		}
+	{}
 
 	motor[motorA] = motor[motorD] = 0;
 }
@@ -109,50 +97,74 @@ void adjustBot(float distance)
 	motor[motorA] = motor[motorD] = 0;
 }
 
-void moveBot(int rescueX, int rescueY, int saveX, int saveY, bool pickDrop){
+bool moveBot(int rescueX, int rescueY, int saveX, int saveY, float adjustDist, int cycle){
 	float dist = sqrt(pow((saveX-rescueX),2)+pow((saveY-rescueY),2))*15;
 
 	nMotorEncoder[motorA] = 0;
 	motor[motorA] = motor[motorD] = FULL_POWER;
 
-	//for(int i = FULL_POWER ; i>15 ; i--){
-	//	motor[motorA] = motor[motorD] = i;
+	int colour1 = 0, colour2 = 0, colour3 = 0;
+	bool loop1 = true;
+	const int wait = 12;
+	bool error = false;
 
-	//}
-
-	if (!pickDrop){
-		float i = FULL_POWER;
-		while(SensorValue[S4]!=(int)colorBlue){ // new pid add the other side of if
-			if((i>15) && (abs(nMotorEncoder[motorA])*CONVERSION)> 0.5){
-				motor[motorA] = motor[motorD] = i;
-				if (SensorValue[S4]!=(int)colorBlue){
-					wait1Msec(dist/abs(nMotorEncoder[motorA])*CONVERSION);
-				}
-				i--;
-			}
+	while(loop1 && cycle!=6 && !error)
+	{
+		if(abs(nMotorEncoder[motorA])*CONVERSION>dist+10){
+			error = true;
 		}
 
+		if((abs(nMotorEncoder[motorA])*CONVERSION>dist+adjustDist) && !error){
+			//	motor[motorA] = motor[motorD] = 50;
+			if (SensorValue[S4] == (int)colorBlue || SensorValue[S4] == (int)colorRed){
+				colour1 = SensorValue[S4];
+				wait1Msec(wait);
 
-		while(SensorValue[S4]!=(int)colorBlue)
-			{}
-	}else{
-		while(SensorValue[S4]!=(int)colorRed)
-			{}
+				if (SensorValue[S4] == (int)colorBlue || SensorValue[S4] == (int)colorRed){
+					colour2 = SensorValue[S4];
+					wait1Msec(wait);
+
+					if (SensorValue[S4] == (int)colorBlue || SensorValue[S4] == (int)colorRed){
+						colour3 = SensorValue[S4];
+						wait1Msec(wait);
+						if(colour1 == colour2 && colour1 == colour3){
+							loop1 = false;
+						}
+					}
+				}
+			}
+		}
+		colour1 = 0;
+		colour2 = 0;
+		colour3 = 0;
 	}
 
-	motor[motorA] = motor[motorD] = 15;
-	while(abs(nMotorEncoder[motorA]) * CONVERSION < (dist-21.5))
-	{}
-
-	motor[motorA] = motor[motorD] = 0;
+	if(error){
+		motor[motorA] = motor[motorD] = 0;
+		rotate(180);
+		nMotorEncoder[motorA] = 0;
+		motor[motorA] = motor[motorD] = FULL_POWER;
+		while(abs(nMotorEncoder[motorA]) * CONVERSION < dist+10)
+		{}
+		motor[motorA] = motor[motorD] = 0;
+		return error;
+		}else{
+		if(cycle == 6){
+			while(abs(nMotorEncoder[motorA]) * CONVERSION < dist) {}
+			}else{
+			while(abs(nMotorEncoder[motorA]) * CONVERSION < (dist-21.5)) {}
+		}
+		motor[motorA] = motor[motorD] = 0;
+		wait1Msec(1000);
+	}
+	return error;
 }
-
 
 void operateClaw(bool openOrClose){
 	if(openOrClose){
-		setServoPosition(S3, 3, 65);
+		setServoPosition(S3, 7, 65);
 		}else{
-		setServoPosition(S3, 3, 10);
+		setServoPosition(S3, 7, 5);
 	}
 }
 
@@ -182,12 +194,13 @@ void fileRead(TFileHandle read)
 	bool up = false;
 	bool down = true;
 	bool Claw = true;
+	bool loop2 = false;
 
 	operateClaw(Claw);
 
 	clearTimer(T1);
 
-	for (int i = 0; i<7; i++)
+	for (int i = 0; i<7 && !loop2; i++)
 	{
 
 		if (i==0 || i==2 || i==4)
@@ -209,28 +222,57 @@ void fileRead(TFileHandle read)
 
 
 		wait1Msec(1000);
-		rotate(angle);
+
+
+		if (i==0) {//-
+			rotate(angle+3);
+			} else if (i==1){//-
+			rotate(angle+1);
+			} else if (i==2){//+
+			rotate(angle+1);
+			} else if (i==3){//+
+			rotate(angle-4);
+			} else if (i==4){//-
+			rotate(angle+3);
+			} else if (i==5){//+
+			rotate(angle-2);
+			} else if (i==6){//+
+			rotate(angle);
+		}
 
 
 		wait1Msec(1000);
-		moveBot(xcoords[i], ycoords[i], xcoords[i+1], ycoords[i+1], Claw);
+		loop2 = moveBot(xcoords[i], ycoords[i], xcoords[i+1], ycoords[i+1], adjustDist-0.5, i);
 
+		if (!loop2){
+			driveSum += abs(nMotorEncoder[motorA])*CONVERSION;
+			wait1Msec(1000);
+			elevate(down);
+			wait1Msec(1000);
 
-		driveSum += abs(nMotorEncoder[motorA])*CONVERSION;
-		wait1Msec(1000);
-		elevate(down);
-		wait1Msec(1000);
-		operateClaw(Claw);
-		elevate(up);
-		adjustBot(adjustDist);
-		wait1Msec(1000);
+			if (i>=0 && i<6)
+			{
+				operateClaw(Claw);
+				if(Claw){
+					wait1Msec(2000);
+				}
+				elevate(up);
+				adjustBot(adjustDist);
+			}
+		}
 	}
 
-	float driveTime = time1[T1]/1000.0;
-	resetGripper(S3, 3);
-	displayTextLine(4, "Time of Rescue: %f", driveTime);
-	displayTextLine(5, "Total Distance Travelled: %fcm/s", driveSum);
-	wait1Msec(10000);
+	if(!loop2){
+		float driveTime = time1[T1]/1000.0;
+		resetGripper(S3, 7);
+		displayTextLine(4, 	"Time of Rescue: %f", driveTime);
+		displayTextLine(5, "Total Distance Travelled: %fcm/s", driveSum);
+		wait1Msec(10000);
+	}	else {
+		displayTextLine(4, "ERROR");
+		displayTextLine(5, "Rescue Bot returned to previous location.");
+		wait1Msec(10000);
+	}
 }
 
 
